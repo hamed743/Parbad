@@ -19,7 +19,8 @@ namespace Parbad.Gateway.Zibal.Internal
 {
     internal static class ZibalHelper
     {
-        private const int SuccessCode = 100;
+        private const int RequestSuccessCode = 100;
+        private const int FetchSuccessCode = 2;
         private const int PaymentAlreadyVerifiedCode = 201;
 
         public static string ZibalRequestAdditionalKeyName => "ZibalRequest";
@@ -60,7 +61,7 @@ namespace Parbad.Gateway.Zibal.Internal
                 return PaymentRequestResult.Failed(messagesOptions.InvalidDataReceivedFromGateway, account.Name);
             }
 
-            if (response.Result != SuccessCode)
+            if (response.Result != RequestSuccessCode)
             {
                 var failureMessage = ZibalTranslator.TranslateResult(response.Result) ?? response.Message ?? messagesOptions.PaymentFailed;
 
@@ -85,7 +86,7 @@ namespace Parbad.Gateway.Zibal.Internal
 
             var trackIdInDatabase = GetTrackId(invoiceContext.Transactions);
 
-            var isSucceed = status.Exists && status.Value == SuccessCode &&
+            var isSucceed = status.Exists && status.Value == FetchSuccessCode &&
                             trackId.Exists && trackId.Value == trackIdInDatabase;
 
             string? message;
@@ -131,7 +132,7 @@ namespace Parbad.Gateway.Zibal.Internal
                 return PaymentVerifyResult.Failed(messagesOptions.InvalidDataReceivedFromGateway);
             }
 
-            if (response.Result != SuccessCode)
+            if (response.Result != RequestSuccessCode)
             {
                 var verifyResult = PaymentVerifyResult.Failed(response.Message);
                 verifyResult.GatewayResponseCode = response.Result.ToString();
